@@ -146,19 +146,29 @@ def convert_to_smf(md_document, head_file=None, monospace=False, name_chapters=F
     # write document body
     return MdParser(doc, input, monospace, name_chapters, name_parts).parse().dump()
 
+def print_word_count(md_document):
+    lines = [i.strip() for i in md_document.splitlines() if i.strip()]
+    print(f'Word count: {count_words(lines)}')
+    todos = len([i for i in lines if i.startswith('> TODO:')])
+    print(f'Remaining to-dos: {todos}')
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--head-file', help='File containing manuscript head information')
     parser.add_argument('-m', '--monospace', help='Use a monospace font', action='store_true')
     parser.add_argument('-c', '--chapter-names', help='Display chapter names in addition to numbering', action='store_true')
     parser.add_argument('-p', '--part-names', help='Display part names in addition to numbering', action='store_true')
+    parser.add_argument('-w', '--word-count', help='Display word count information and exit', action='store_true')
     args = parser.parse_args()
-    print(convert_to_smf(
-        sys.stdin.read(),
-        args.head_file,
-        args.monospace,
-        args.chapter_names,
-        args.part_names))
+    if args.word_count:
+        print_word_count(sys.stdin.read())
+    else:
+        print(convert_to_smf(
+            sys.stdin.read(),
+            args.head_file,
+            args.monospace,
+            args.chapter_names,
+            args.part_names))
 
 if __name__ == "__main__":
     main()
