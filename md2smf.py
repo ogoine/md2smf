@@ -12,6 +12,12 @@ FAKE_HEAD = ['Your Name',
              'email@example.com',
              '(555) 555 - 5555']
 
+SINGLE_LEFT_QUOTE = r'\lquote '
+SINGLE_RIGHT_QUOTE = r'\rquote '
+DOUBLE_LEFT_QUOTE = r'\ldblquote '
+DOUBLE_RIGHT_QUOTE = r'\rdblquote '
+EM_DASH = r'\emdash '
+
 def count_words(lines):
     """Count words in a list of lines, excluding headings and comments"""
 
@@ -26,6 +32,61 @@ def heading_level(line):
             return i
     return 3
 
+def char_weight(string, index):
+    """Return a weight of 0-2 for the char at the given index, used for deciding quote direction"""
+
+    if index < 0 or index >= len(string):
+        return 0
+    if string[index] == ' ':
+        return 0
+    if string[index].isalnum():
+        return 2
+    return 1 # symbols
+
+def substitute(string, index, substitute):
+    """Replace the char at index in string with substitute (str)"""
+
+    return string[:index] + substitute + string[index + 1:]
+
+def smart_replace(line):
+    """Replace dumb quotes with smart, apply italics, etc."""
+
+    # start with simple substitutions
+    line = line.replace("--", EM_DASH)
+    line = line.replace('  ', ' ')
+    line = line.replace('  ', ' ')
+
+    # now parse more contextual ones
+    italics_on = False
+    index = 0
+    while index < len(line):
+        if line[index] == "'":
+            if char_weight(line, index - 1) < char_weight(line, index + 1):
+                line = substitute(line, index, SINGLE_LEFT_QUOTE)
+                index += len(SINGLE_LEFT_QUOTE)
+            else:
+                line = substitute(line, index, SINGLE_RIGHT_QUOTE)
+                index += len(SINGLE_RIGHT_QUOTE)
+        elif line[index] == '"':
+            if char_weight(line, index - 1) < char_weight(line, index + 1):
+                line = substitute(line, index, DOUBLE_LEFT_QUOTE)
+                index += len(DOUBLE_LEFT_QUOTE)
+            else:
+                line = substitute(line, index, DOUBLE_RIGHT_QUOTE)
+                index += len(DOUBLE_RIGHT_QUOTE)
+        elif line[index] == '*':
+            if italics_on:
+                line = substitute(line, index, r'\i0 ')
+                index += len(r'\i0 ')
+            else:
+                line = substitute(line, index, r'\i ')
+                index += len(r'\i ')
+            italics_on = not italics_on
+        else:
+            index += 1
+    if italics_on:
+        line += r'\i0 '
+    return line
 
 class MdParser:
     """Parse Markdown document body and build out an initialized RtfDocument from it"""
@@ -96,7 +157,10 @@ class MdParser:
         normal_lines = []
         while self.lines and heading_level(self.lines[0]) == 0:
             if self.lines[0][0] != '>':
-                normal_lines.append(self.lines[0])
+                if self.monospace:
+                    normal_lines.append(self.lines[0])
+                else:
+                    normal_lines.append(smart_replace(self.lines[0]))
             self.lines.pop(0)
         self.doc.add_lines(normal_lines)
 
