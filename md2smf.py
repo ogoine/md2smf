@@ -18,11 +18,16 @@ DOUBLE_LEFT_QUOTE = r'\ldblquote '
 DOUBLE_RIGHT_QUOTE = r'\rdblquote '
 EM_DASH = r'\emdash '
 
+def trunc(number, places):
+    """Truncate the given number to the nearest 10^places"""
+
+    return 10 ** places * int(number / 10 ** places)
+
 def count_words(lines):
     """Count words in a list of lines, excluding headings and comments"""
 
     body = [i for i in lines if i[0] not in ("#", ">")]
-    return 100 * int(len(' '.join(body).split(' ')) / 100)
+    return len(' '.join(body).split(' '))
 
 def heading_level(line):
     """Return heading level of line (1, 2, 3, or 0 for normal)"""
@@ -199,12 +204,15 @@ def convert_to_smf(md_document, head_file=None, monospace=False, name_chapters=F
         monospace,
         header_text=f'{last} / {short_name} / _P#_',
         first_header_text='')
-    head[0] = f'{head[0]}\tAbout {word_count} words'
+    if word_count < 20000:
+        head[0] = f'{head[0]}\tabout {round(word_count, 2):,} words'
     for i in range(18 - len(head)):
         head.append('')
     doc.add_lines(head, indent=False, double_space=False)
     doc.add_lines([title], style="title")
-    doc.add_lines([f'by {author}'], style="subtitle")
+    doc.add_lines([f'By {author}'], style="subtitle")
+    if word_count >= 20000:
+        doc.add_lines([f'about {round(word_count, 3):,} words'])
     doc.add_lines(['']) 
 
     # write document body
