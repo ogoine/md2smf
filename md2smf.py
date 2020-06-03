@@ -18,10 +18,10 @@ DOUBLE_LEFT_QUOTE = r'\ldblquote '
 DOUBLE_RIGHT_QUOTE = r'\rdblquote '
 EM_DASH = r'\emdash '
 
-def trunc(number, places):
-    """Truncate the given number to the nearest 10^places"""
+def pround(number, places):
+    """Round the given number to the nearest 10^places"""
 
-    return 10 ** places * int(number / 10 ** places)
+    return 10 ** places * round(number / 10 ** places)
 
 def count_words(lines):
     """Count words in a list of lines, excluding headings and comments"""
@@ -204,14 +204,14 @@ def convert_to_smf(md_document, head_file=None, monospace=False, name_chapters=F
         header_text=f'{last} / {short_name} / _P#_',
         first_header_text='')
     if word_count < 20000:
-        head[0] = f'{head[0]}\tabout {round(word_count, 2):,} words'
+        head[0] = f'{head[0]}\tabout {pround(word_count, 2):,} words'
     for i in range(18 - len(head)):
         head.append('')
     doc.add_lines(head, indent=False, double_space=False)
     doc.add_lines([title], style="title")
     doc.add_lines([f'By {author}'], style="subtitle")
     if word_count >= 20000:
-        doc.add_lines([''] * 9 + [f'about {round(word_count, 3):,} words'], style='centered')
+        doc.add_lines([''] * 9 + [f'about {pround(word_count, 3):,} words'], style='centered')
     else:
         doc.add_lines(['']) 
 
