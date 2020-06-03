@@ -114,26 +114,25 @@ class MdParser:
         while self.lines:
             new_level = heading_level(self.lines[0])
             if new_level in (1, 2):
-                self.parse_heading(new_level)
+                self.parse_heading()
                 new_division = True
             elif new_level == 3:
                 self.parse_section(hide=new_division)
             else:
-                if self.lines[0][0] == '>':
-                    # don't assume a normal section is beginning if it's only a comment
-                    self.lines.pop(0)
-                else:
-                    self.parse_normal()
-                    new_division = False
+                self.parse_normal()
+                new_division = False
         return self.doc
 
-    def parse_heading(self, level):
+    def parse_heading(self):
         """Parse one or more part or chapter headers, adding to self.doc"""
 
-        while self.lines and heading_level(self.lines[0]) == level:
+        already_broken = False
+        level = heading_level(self.lines[0])
+        while self.lines and level in (1, 2):
             line = self.lines[0][level:].strip()
-            blanks = ['' for i in range(8)]
-            self.doc.add_lines(blanks, new_page=True)
+            blanks = [''] if already_broken else [''] * 8
+            self.doc.add_lines(blanks, new_page=not already_broken)
+            already_broken = True
             if level == 1:
                 self.part_count += 1
                 text = f'Part {self.part_count}'
@@ -147,13 +146,14 @@ class MdParser:
             self.doc.add_lines([text], style=f'h{level}')
             self.doc.add_lines(['']) 
             self.lines.pop(0)
+            level = heading_level(self.lines[0])
 
     def parse_section(self, hide=False):
         """Parse one or more section headers, adding to self.doc"""
 
         while self.lines and heading_level(self.lines[0]) == 3:
             if not hide:
-                self.doc.add_lines(['#'], style='h3')
+                self.doc.add_lines(['#'], style='centered')
             self.lines.pop(0)
 
     def parse_normal(self):
@@ -161,18 +161,17 @@ class MdParser:
 
         normal_lines = []
         while self.lines and heading_level(self.lines[0]) == 0:
-            if self.lines[0][0] != '>':
-                if self.monospace:
-                    normal_lines.append(self.lines[0])
-                else:
-                    normal_lines.append(smart_replace(self.lines[0]))
+            if self.monospace:
+                normal_lines.append(self.lines[0])
+            else:
+                normal_lines.append(smart_replace(self.lines[0]))
             self.lines.pop(0)
         self.doc.add_lines(normal_lines)
 
 def convert_to_smf(md_document, head_file=None, monospace=False, name_chapters=False, name_parts=False):
 
     # read info
-    lines = [i.strip() for i in md_document.splitlines() if i.strip()]
+    lines = [i.strip() for i in md_document.splitlines() if i.strip() and i.strip()[0] != '>']
     word_count = count_words(lines)
     # NEED TO REVERSE SORT
     input = lines.copy()
@@ -212,8 +211,9 @@ def convert_to_smf(md_document, head_file=None, monospace=False, name_chapters=F
     doc.add_lines([title], style="title")
     doc.add_lines([f'By {author}'], style="subtitle")
     if word_count >= 20000:
-        doc.add_lines([f'about {round(word_count, 3):,} words'])
-    doc.add_lines(['']) 
+        doc.add_lines([''] * 9 + [f'about {round(word_count, 3):,} words'], style='centered')
+    else:
+        doc.add_lines(['']) 
 
     # write document body
     return MdParser(doc, input, monospace, name_chapters, name_parts).parse().dump()

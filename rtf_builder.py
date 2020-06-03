@@ -61,9 +61,9 @@ class RtfDocument:
          - lines (list of str): The lines of text to append
          - style (str): The style to apply. One of:
             - normal
+            - centered
             - h1
             - h2
-            - h3
             - title
             - subtitle
          - indent (boolean): If True, apply a first-line half-inch indent. Ignored
@@ -82,7 +82,7 @@ class RtfDocument:
                 scode = "s1"
             elif style == "h2":
                 scode = "s2"
-            elif style == "h3":
+            elif style == "centered":
                 scode = "s3"
             elif style == "title":
                 scode = "s15"
@@ -215,7 +215,7 @@ TIMES_STYLESHEET = r"""{\s0\snext0\sqformat\spriority0\fi720\sb0\sa0\aspalpha\as
 \ltrch\b0\i0\fs24\f0\strike0\ulnone\cf1 heading 2;}
 {\s3\sbasedon0\snext0\styrsid15694742\sqformat\spriority0\keep\keepn\fi0\sb0\sa0\aspalpha\aspnum
 \adjustright\widctlpar\ltrpar\li0\lin0\ri0\rin0\qc\faauto\sl480\slmult1\rtlch\ab0\ai0\af0\afs24
-\ltrch\b0\i0\fs24\f0\strike0\ulnone\cf1 heading 3;}
+\ltrch\b0\i0\fs24\f0\strike0\ulnone\cf1 centered;}
 {\s4\sbasedon0\snext0\styrsid15694742\sqformat\spriority0\keep\keepn\fi0\sb0\sa0\aspalpha\aspnum
 \adjustright\widctlpar\ltrpar\li0\lin0\ri0\rin0\qr\faauto\s1240\slmult1\rtlch\ab0\ai0\af0\afs24
 \ltrch\b0\i0\fs24\f0\strike0\ulnone\cf1 page header;}
@@ -238,7 +238,7 @@ COURIER_STYLESHEET = r"""{\s0\snext0\sqformat\spriority0\fi720\sb0\sa0\aspalpha\
 \ltrch\b0\i0\fs24\loch\af3\dbch\af3\hich\f3\strike0\ulnone\cf1 heading 2;}
 {\s3\sbasedon0\snext0\styrsid15694742\sqformat\spriority0\keep\keepn\fi0\sb0\sa0\aspalpha\aspnum
 \adjustright\widctlpar\ltrpar\li0\lin0\ri0\rin0\qc\faauto\sl480\slmult1\rtlch\ab0\ai0\af3\afs24
-\ltrch\b0\i0\fs24\loch\af3\dbch\af3\hich\f3\strike0\ulnone\cf1 heading 3;}
+\ltrch\b0\i0\fs24\loch\af3\dbch\af3\hich\f3\strike0\ulnone\cf1 centered;}
 {\s4\sbasedon0\snext0\styrsid15694742\sqformat\spriority0\keep\keepn\fi0\sb0\sa0\aspalpha\aspnum
 \adjustright\widctlpar\ltrpar\li0\lin0\ri0\rin0\qr\faauto\s1240\slmult1\rtlch\ab0\ai0\af3\afs24
 \ltrch\b0\i0\fs24\f3\strike0\ulnone\cf1 page header;}
