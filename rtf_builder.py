@@ -51,8 +51,7 @@ class RtfDocument:
         out = out.replace("__FONT__", self.font)
         if first_page:
             return out.replace("__HEADERTYPE__", "headerf")
-        else:
-            return out.replace("__HEADERTYPE__", "header")
+        return out.replace("__HEADERTYPE__", "header")
 
     def add_lines(self, lines, style="normal", indent=True, double_space=True, new_page=False):
         """Add one or more lines of a particular style to the end of the document.
@@ -101,7 +100,7 @@ class RtfDocument:
             line = lines[0].replace("\n", r" \par ")
             line = line.replace("\t", r" \tab ")
             self.insert_rtf("{" + line + r" \par}")
-            self.insert_rtf(styling.replace("\pagebb", ""))
+            self.insert_rtf(styling.replace(r"\pagebb", ""))
             for line in lines[1:]:
                 line = line.replace("\n", r" \par ")
                 line = line.replace("\t", r" \tab ")
